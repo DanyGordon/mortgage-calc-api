@@ -19,11 +19,12 @@ export class BanksService {
     try {
       const id = this.JwtService.decode(token)['sub'];
       if(id) {
-        return await this.BankRepository.find({ where: { user: id } });
+        return await this.BankRepository.find({ where: { user: id }, order: { id: 'DESC' } });
       } else {
         return new UnauthorizedException;
       }
     } catch (err) {
+      console.log(err);
       return new BadRequestException;
     }
   }
@@ -111,7 +112,7 @@ export class BanksService {
       if(bank.user.id !== +userId) {
         return new ForbiddenException;
       }
-      const records = await this.RecordRepository.find({ where: { bank: bankId } });
+      const records = await this.RecordRepository.find({ where: { bank: bankId }, order: { date: 'DESC' } });
       return records;
     } catch (err) {
       console.log(err);
@@ -142,7 +143,7 @@ export class BanksService {
     }
   }
 
-  async createNewRecord(token: string, bankId: number, body) {
+  async createNewRecord(token: string, bankId: any, body) {
     try {
       const userId = this.JwtService.decode(token)['sub'];
       if(!userId) {
@@ -154,13 +155,16 @@ export class BanksService {
       }
       const record = new Record();
       Object.keys(body).forEach(field => body[field] ? record[field] = body[field] : null);
-      if(record.imprestpercent < +bank.minDownPaymentPercent) {
+      if(record.imprestpercent < +bank.minDownPaymentPercent || 
+        record.imprest < Math.floor(record.initialloan * +bank.minDownPaymentPercent / 100)) {
+
         return new BadRequestException;
       }
       record.bank = bank;
+      console.log(record);
       await this.RecordRepository.insert(record);
     } catch (err) {
-      console.log(err);
+      //console.log(err);
     }
   }
 
