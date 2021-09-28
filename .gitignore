@@ -5,6 +5,9 @@
 # .env
 .env
 
+# static file
+/client
+
 # Logs
 logs
 *.log

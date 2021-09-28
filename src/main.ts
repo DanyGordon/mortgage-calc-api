@@ -2,6 +2,8 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 
 import * as helmet from 'helmet';
+import * as compression from 'compression';
+
 import { CspParams } from './configuration/csp.config';
 
 async function bootstrap() {
@@ -12,13 +14,14 @@ async function bootstrap() {
       ...CspParams
     }
   }))
+  app.use(compression());
   // To enable CORS
-  /*app.enableCors({
+  app.enableCors({
     origin: "*",
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     preflightContinue: false,
     optionsSuccessStatus: 204
-  });*/
+  });
   app.setGlobalPrefix('api/v1');
   await app.listen(3000);
 }
