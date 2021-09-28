@@ -143,7 +143,7 @@ export class BanksService {
     }
   }
 
-  async createNewRecord(token: string, bankId: any, body) {
+  async createNewRecord(token: string, bankId: number, body) {
     try {
       const userId = this.JwtService.decode(token)['sub'];
       if(!userId) {
@@ -161,10 +161,9 @@ export class BanksService {
         return new BadRequestException;
       }
       record.bank = bank;
-      console.log(record);
       await this.RecordRepository.insert(record);
     } catch (err) {
-      //console.log(err);
+      console.log(err);
     }
   }
 
