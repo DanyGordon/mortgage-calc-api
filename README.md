@@ -31,6 +31,8 @@
 ```bash
 $ npm install
 ```
+## Before running the app
+Setup your database in app.module.ts
 
 ## Running the app
 
