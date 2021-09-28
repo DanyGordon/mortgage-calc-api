@@ -163,7 +163,7 @@ export class BanksService {
       record.bank = bank;
       await this.RecordRepository.insert(record);
     } catch (err) {
-      //console.log(err);
+      console.log(err);
     }
   }
 
