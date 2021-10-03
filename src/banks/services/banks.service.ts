@@ -5,6 +5,9 @@ import { Repository } from 'typeorm';
 
 import { Bank } from 'src/domain/bank.entity';
 import { Record } from 'src/domain/record.entity';
+import { BankBodyDto } from '../dto/bank.body.dto';
+import { BankUpdateDto } from '../dto/bankUpdate.dto';
+import { RecordBodyDto } from '../dto/record.body.dto';
 
 @Injectable()
 export class BanksService {
@@ -44,8 +47,8 @@ export class BanksService {
       return new BadRequestException;
     }
   }
-
-  async createNewBank(body, token: string): Promise<any> {
+  
+  async createNewBank(body: BankBodyDto, token: string): Promise<void | HttpException> {
     try {
       const userId = this.JwtService.decode(token)['sub'];
       if(!userId) {
@@ -62,8 +65,8 @@ export class BanksService {
       return new ConflictException;
     }
   }
-
-  async updateBank(id: number, body, token: string) {
+  
+  async updateBank(id: number, body: BankUpdateDto, token: string): Promise<Bank | HttpException> {
     try {
       const userId = this.JwtService.decode(token)['sub'];
       if(!userId) {
@@ -75,7 +78,7 @@ export class BanksService {
           return new ForbiddenException;
         }
         Object.keys(bank).forEach(field => body[field] ? bank[field] = body[field] : null);
-        await this.BankRepository.save(bank);
+        return await this.BankRepository.save(bank);
       } else {
         return new NotFoundException;
       }
@@ -84,7 +87,7 @@ export class BanksService {
     }
   }
 
-  async deleteBank(id: number, token: string): Promise<any> {
+  async deleteBank(id: number, token: string): Promise<void | HttpException> {
     try {
       const userId = this.JwtService.decode(token)['sub'];
       if(!userId) {
@@ -101,8 +104,8 @@ export class BanksService {
       return new BadRequestException;
     }
   }
-
-  async findAllRecords(token: string, bankId: number) {
+  
+  async findAllRecords(token: string, bankId: number): Promise<Record[] | HttpException> {
     try {
       const userId = this.JwtService.decode(token)['sub'];
       if(!userId) {
@@ -119,8 +122,8 @@ export class BanksService {
       return new BadRequestException;
     }
   }
-
-  async findRecordById(token: string, bankId: number, id: number) {
+  
+  async findRecordById(token: string, bankId: number, id: number): Promise<Record | HttpException> {
     try {
       const userId = this.JwtService.decode(token)['sub'];
       if(!userId) {
@@ -142,8 +145,8 @@ export class BanksService {
       return new BadRequestException;
     }
   }
-
-  async createNewRecord(token: string, bankId: number, body) {
+  
+  async createNewRecord(token: string, bankId: number, body: RecordBodyDto): Promise<void | HttpException> {
     try {
       const userId = this.JwtService.decode(token)['sub'];
       if(!userId) {
@@ -166,8 +169,8 @@ export class BanksService {
       console.log(err);
     }
   }
-
-  async removeRecordById(token: string, bankId: number, id: number) {
+  
+  async removeRecordById(token: string, bankId: number, id: number): Promise<void | HttpException> {
     try {
       const userId = this.JwtService.decode(token)['sub'];
       if(!userId) {

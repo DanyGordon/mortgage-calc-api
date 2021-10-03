@@ -26,7 +26,7 @@ export class RecordBodyDto {
   insurance: number
 
   @IsNumber()
-  @Min(30000)
+  @Min(70000)
   @Max(4000000)
   initialloan: number
 

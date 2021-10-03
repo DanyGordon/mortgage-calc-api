@@ -1,20 +1,20 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ServeStaticModule } from '@nestjs/serve-static';
-
+import { ConfigModule } from '@nestjs/config';
 import { join } from 'path';
+
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+
+import jwtConstants from './configuration/jwt.constants';
 
 import { AuthenticationModule } from './authentication/authentication.module';
 import { BanksModule } from './banks/banks.module';
 import { EncryptorModule } from './encryptor/encryptor.module';
-
-import { AppController } from './app.controller';
-
-import { AppService } from './app.service';
 import { AccountModule } from './account/account.module';
-import { ConfigModule } from '@nestjs/config';
 
-import jwtConstants from './configuration/jwt.constants';
+import { HttpLoggerMiddleware } from './middlewares/http-logger.middleware';
 
 import { Account } from './domain/account.entity';
 import { Bank } from './domain/bank.entity';
@@ -46,4 +46,8 @@ import { Record } from './domain/record.entity';
   controllers: [AppController],
   providers: [AppService],
 }) 
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(HttpLoggerMiddleware).forRoutes('*');
+  }
+}

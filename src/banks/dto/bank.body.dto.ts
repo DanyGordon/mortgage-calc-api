@@ -1,6 +1,6 @@
 import { IsNumber, IsString, Length, Max, Min } from "class-validator"
 
-export class BankRequestDto {
+export class BankBodyDto {
   @IsString()
   @Length(4, 40)
   name: string

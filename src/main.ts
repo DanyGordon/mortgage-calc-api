@@ -7,7 +7,9 @@ import * as compression from 'compression';
 import { CspParams } from './configuration/csp.config';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    logger: ['log', 'error', 'warn', 'verbose'],
+  });
   app.use(helmet());
   app.use(helmet.contentSecurityPolicy({
     directives: {
@@ -18,7 +20,7 @@ async function bootstrap() {
   // To enable CORS
   app.enableCors({
     origin: "*",
-    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    methods: "GET,OPTIONS,HEAD,PUT,PATCH,POST,DELETE",
     preflightContinue: false,
     optionsSuccessStatus: 204
   });
