@@ -31,10 +31,14 @@ export class AuthenticationService {
       if(id) {
         return { token: this.JwtService.sign({ sub: id }) };
       } else {
-        return new NotFoundException;
+        throw new NotFoundException();
       }
     } catch (err) {
-      return new BadRequestException;
+      if(err instanceof HttpException) {
+        throw err;
+      } else {
+        throw new BadRequestException();
+      }
     }
   }
 }

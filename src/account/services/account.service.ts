@@ -1,4 +1,4 @@
-import { BadRequestException, HttpException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, HttpException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -34,11 +34,15 @@ export class AccountService {
       const id = this.JwtService.decode(token)['sub'];
       const user = await this.AccountRepository.findOne(id);
       if(!user) {
-        return new NotFoundException;
+        throw new NotFoundException();
       }
       return { id: user.id, name: user.name, email: user.email };
     } catch (err) {
-      return new BadRequestException;
+      if(err instanceof HttpException) {
+        throw err;
+      } else {
+        throw new BadRequestException();
+      }
     }
   }
 
@@ -50,20 +54,27 @@ export class AccountService {
       user.password = await this.EncryptorService.hash(password);
       await this.AccountRepository.insert(user);
     } catch (err) {
-      return new BadRequestException;
+      if(err instanceof HttpException) {
+        throw err;
+      } else {
+        throw new ConflictException('Email must be unique and password must be long enought');
+      }
     }
   }
 
-  async validateJwt({ token }): Promise<ValidateResponseDto | HttpException> {
+  async updateJwt({ token }): Promise<ValidateResponseDto | HttpException> {
     try {
       if(token && isJWT(token)) {
-        return await this.JwtService.verifyAsync(token) ? { uid: +(this.JwtService.decode(token))['sub'], status: true } : new UnauthorizedException;
+        return { uid: +(this.JwtService.decode(token))['sub'], status: true };
       } else {
-        return new UnauthorizedException;
+        throw new UnauthorizedException();
       }
     } catch (err) {
-      console.log(err);
-      return new BadRequestException;
+      if(err instanceof HttpException) {
+        throw err;
+      } else {
+        throw new BadRequestException('Invalid JWT token');
+      }
     }
   }
 }

@@ -24,11 +24,14 @@ export class BanksService {
       if(id) {
         return await this.BankRepository.find({ where: { user: id }, order: { id: 'DESC' } });
       } else {
-        return new UnauthorizedException;
+        throw new UnauthorizedException();
       }
     } catch (err) {
-      console.log(err);
-      return new BadRequestException;
+      if(err instanceof HttpException) {
+        throw err;
+      } else {
+        throw new BadRequestException();
+      }
     }
   }
 
@@ -37,14 +40,18 @@ export class BanksService {
       const userId = this.JwtService.decode(token)['sub'];
       const bank = (await this.BankRepository.find({ where: { id }, relations: ["user"] }))[0];
       if(!bank) {
-        return new NotFoundException;
+        throw new NotFoundException(`Bank with id ${id} non exist`);
       }
       if(bank.user.id !== +userId) {
-        return new ForbiddenException;
+        throw new ForbiddenException();
       }
       return bank;
     } catch (err) {
-      return new BadRequestException;
+      if(err instanceof HttpException) {
+        throw err;
+      } else {
+        throw new BadRequestException();
+      }
     }
   }
   
@@ -52,7 +59,7 @@ export class BanksService {
     try {
       const userId = this.JwtService.decode(token)['sub'];
       if(!userId) {
-        return new UnauthorizedException;
+        throw new UnauthorizedException();
       }
       const bank = new Bank();
       Object.keys(body).forEach(field => body[field] ? bank[field] = body[field] : null);
@@ -61,8 +68,11 @@ export class BanksService {
       }
       await this.BankRepository.insert(bank);
     } catch (err) {
-      console.log(err);
-      return new ConflictException;
+      if(err instanceof HttpException) {
+        throw err;
+      } else {
+        throw new ConflictException();
+      }
     }
   }
   
@@ -70,20 +80,24 @@ export class BanksService {
     try {
       const userId = this.JwtService.decode(token)['sub'];
       if(!userId) {
-        return new UnauthorizedException;
+        throw new UnauthorizedException();
       }
       const bank = (await this.BankRepository.find({ where: { id }, relations: ["user"] }))[0];
       if(bank) {
         if(bank.user.id !== +userId) {
-          return new ForbiddenException;
+          throw new ForbiddenException();
         }
         Object.keys(bank).forEach(field => body[field] ? bank[field] = body[field] : null);
         return await this.BankRepository.save(bank);
       } else {
-        return new NotFoundException;
+        throw new NotFoundException();
       }
     } catch (err) {
-      return new BadRequestException;
+      if(err instanceof HttpException) {
+        throw err;
+      } else {
+        throw new BadRequestException();
+      }
     }
   }
 
@@ -91,17 +105,21 @@ export class BanksService {
     try {
       const userId = this.JwtService.decode(token)['sub'];
       if(!userId) {
-        return new UnauthorizedException;
+        throw new UnauthorizedException();
       }
       const bank = (await this.BankRepository.find({ where: { id }, relations: ["user"] }))[0];
       if(bank) {
         if(bank.user.id !== +userId) {
-          return new ForbiddenException;
+          throw new ForbiddenException();
         }
         await this.BankRepository.delete(id);
       }
     } catch (err) {
-      return new BadRequestException;
+      if(err instanceof HttpException) {
+        throw err;
+      } else {
+        throw new BadRequestException();
+      }
     }
   }
   
@@ -109,17 +127,20 @@ export class BanksService {
     try {
       const userId = this.JwtService.decode(token)['sub'];
       if(!userId) {
-        return new UnauthorizedException;
+        throw new UnauthorizedException();
       }
       const bank = (await this.BankRepository.find({ where: { id: bankId }, relations: ["user"] }))[0];
       if(bank.user.id !== +userId) {
-        return new ForbiddenException;
+        throw new ForbiddenException();
       }
       const records = await this.RecordRepository.find({ where: { bank: bankId }, order: { date: 'DESC' } });
       return records;
     } catch (err) {
-      console.log(err);
-      return new BadRequestException;
+      if(err instanceof HttpException) {
+        throw err;
+      } else {
+        throw new BadRequestException();
+      }
     }
   }
   
@@ -127,22 +148,25 @@ export class BanksService {
     try {
       const userId = this.JwtService.decode(token)['sub'];
       if(!userId) {
-        return new UnauthorizedException;
+        throw new UnauthorizedException();
       }
       const bank = (await this.BankRepository.find({ where: { id: bankId }, relations: ["user"] }))[0];
       if(bank.user.id !== +userId) {
-        return new ForbiddenException;
+        throw new ForbiddenException();
       }
       const records = await this.RecordRepository.find({ where: { bank: bankId } });
       const record = records.find(rec => rec.id === +id);
       if(record) {
         return record;
       } else {
-        return new NotFoundException;
+        throw new NotFoundException();
       }
     } catch (err) {
-      console.log(err);
-      return new BadRequestException;
+      if(err instanceof HttpException) {
+        throw err;
+      } else {
+        throw new BadRequestException();
+      }
     }
   }
   
@@ -150,23 +174,27 @@ export class BanksService {
     try {
       const userId = this.JwtService.decode(token)['sub'];
       if(!userId) {
-        return new UnauthorizedException;
+        throw new UnauthorizedException();
       }
       const bank = (await this.BankRepository.find({ where: { id: bankId }, relations: ["user"] }))[0];
       if(bank.user.id !== +userId) {
-        return new ForbiddenException;
+        throw new ForbiddenException();
       }
       const record = new Record();
       Object.keys(body).forEach(field => body[field] ? record[field] = body[field] : null);
       if(record.imprestpercent < +bank.minDownPaymentPercent || 
         record.imprest < Math.floor(record.initialloan * +bank.minDownPaymentPercent / 100)) {
 
-        return new BadRequestException;
+          throw new BadRequestException();
       }
       record.bank = bank;
       await this.RecordRepository.insert(record);
     } catch (err) {
-      console.log(err);
+      if(err instanceof HttpException) {
+        throw err;
+      } else {
+        throw new BadRequestException();
+      }
     }
   }
   
@@ -174,11 +202,11 @@ export class BanksService {
     try {
       const userId = this.JwtService.decode(token)['sub'];
       if(!userId) {
-        return new UnauthorizedException;
+        throw new UnauthorizedException();
       }
       const bank = (await this.BankRepository.find({ where: { id: bankId }, relations: ["user"] }))[0];
       if(bank.user.id !== +userId) {
-        return new ForbiddenException;
+        throw new ForbiddenException();
       }
       const records = await this.RecordRepository.find({ where: { bank: bankId } });
       const record = records.find(rec => rec.id === +id);
@@ -186,8 +214,11 @@ export class BanksService {
         this.RecordRepository.delete(id);
       }
     } catch (err) {
-      console.log(err);
-      return new BadRequestException;
+      if(err instanceof HttpException) {
+        throw err;
+      } else {
+        throw new BadRequestException();
+      }
     }
   }
 }
