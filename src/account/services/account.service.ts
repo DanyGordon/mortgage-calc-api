@@ -8,7 +8,7 @@ import { UserResponseDto } from '../dto/account.user.response.dto';
 
 import { Account } from 'src/domain/account.entity';
 import { ValidateResponseDto } from '../dto/account.validate.response.dto';
-import { isJWT, IsJWT } from 'class-validator';
+import { isJWT } from 'class-validator';
 
 @Injectable()
 export class AccountService {
@@ -57,7 +57,7 @@ export class AccountService {
       if(err instanceof HttpException) {
         throw err;
       } else {
-        throw new ConflictException('Email must be unique and password must be long enought');
+        throw new ConflictException('Email must be unique and password must be long enough');
       }
     }
   }
